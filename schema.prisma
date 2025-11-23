@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  tokenIn     String
+  tokenOut    String
+  amount      Float
+  status      String   @default("pending") // pending, routing, building, submitted, confirmed, failed
+  dex         String?  // raydium, meteora
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  error       String?
+  transaction Transaction?
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  orderId       String   @unique
+  order         Order    @relation(fields: [orderId], references: [id])
+  txHash        String
+  executedPrice Float
+  fee           Float
+  executedAt    DateTime @default(now())
+}
